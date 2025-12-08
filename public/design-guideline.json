@@ -1,0 +1,354 @@
+{
+  "type": "screen",
+  "style": {
+    "backgroundColor": "#1e3a8a",
+    "minHeight": "100vh"
+  },
+  "children": [
+    {
+      "type": "banner",
+      "content": "Free Shipping for US & Canada Customers",
+      "style": {
+        "backgroundColor": "#fbbf24",
+        "color": "#000000",
+        "textAlign": "center",
+        "padding": "8px",
+        "fontSize": "14px"
+      }
+    },
+    {
+      "type": "navbar",
+      "style": {
+        "backgroundColor": "#ffffff",
+        "padding": "16px 24px",
+        "display": "flex",
+        "alignItems": "center",
+        "justifyContent": "space-between"
+      },
+      "children": [
+        {
+          "type": "logo",
+          "children": [
+            {
+              "type": "icon",
+              "style": {
+                "backgroundColor": "#3b82f6",
+                "color": "#ffffff",
+                "borderRadius": "4px",
+                "width": "32px",
+                "height": "32px"
+              }
+            },
+            {
+              "type": "text",
+              "content": "HappyDeel",
+              "style": {
+                "fontSize": "20px",
+                "fontWeight": "bold",
+                "color": "#374151",
+                "marginLeft": "8px"
+              }
+            }
+          ]
+        },
+        {
+          "type": "navigation",
+          "style": {
+            "display": "flex",
+            "gap": "32px"
+          },
+          "children": [
+            {
+              "type": "navLink",
+              "content": "Home",
+              "style": {
+                "color": "#374151",
+                "fontSize": "16px"
+              }
+            },
+            {
+              "type": "navLink",
+              "content": "Products",
+              "style": {
+                "color": "#374151",
+                "fontSize": "16px"
+              }
+            },
+            {
+              "type": "navLink",
+              "content": "Featured",
+              "style": {
+                "color": "#374151",
+                "fontSize": "16px"
+              }
+            },
+            {
+              "type": "navLink",
+              "content": "Track Order",
+              "style": {
+                "color": "#374151",
+                "fontSize": "16px"
+              }
+            },
+            {
+              "type": "navLink",
+              "content": "Contact Us",
+              "style": {
+                "color": "#374151",
+                "fontSize": "16px"
+              }
+            }
+          ]
+        },
+        {
+          "type": "iconGroup",
+          "style": {
+            "display": "flex",
+            "gap": "16px"
+          },
+          "children": [
+            {
+              "type": "icon",
+              "content": "search",
+              "style": {
+                "color": "#374151",
+                "width": "24px",
+                "height": "24px"
+              }
+            },
+            {
+              "type": "icon",
+              "content": "cart",
+              "style": {
+                "color": "#374151",
+                "width": "24px",
+                "height": "24px"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "heroSection",
+      "style": {
+        "backgroundColor": "#1e3a8a",
+        "padding": "80px 24px",
+        "display": "flex",
+        "alignItems": "center",
+        "maxWidth": "1200px",
+        "margin": "0 auto"
+      },
+      "children": [
+        {
+          "type": "textContent",
+          "style": {
+            "flex": "1",
+            "maxWidth": "600px"
+          },
+          "children": [
+            {
+              "type": "heading",
+              "content": "The smart way to buy quality items — for less.",
+              "style": {
+                "fontSize": "48px",
+                "fontWeight": "bold",
+                "color": "#ffffff",
+                "lineHeight": "1.1",
+                "marginBottom": "24px"
+              }
+            },
+            {
+              "type": "description",
+              "content": "We take the risk out of used gear with expert inspection and reliable service on every order.",
+              "style": {
+                "fontSize": "18px",
+                "color": "#e5e7eb",
+                "marginBottom": "32px",
+                "lineHeight": "1.5"
+              }
+            },
+            {
+              "type": "buttonGroup",
+              "style": {
+                "display": "flex",
+                "gap": "16px"
+              },
+              "children": [
+                {
+                  "type": "button",
+                  "content": "Shop Now →",
+                  "style": {
+                    "backgroundColor": "#ffffff",
+                    "color": "#1e3a8a",
+                    "padding": "12px 24px",
+                    "borderRadius": "6px",
+                    "fontSize": "16px",
+                    "fontWeight": "600",
+                    "border": "none"
+                  }
+                },
+                {
+                  "type": "button",
+                  "content": "Featured Products",
+                  "style": {
+                    "backgroundColor": "transparent",
+                    "color": "#ffffff",
+                    "padding": "12px 24px",
+                    "borderRadius": "6px",
+                    "fontSize": "16px",
+                    "fontWeight": "600",
+                    "border": "2px solid #ffffff"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "productImage",
+          "style": {
+            "position": "relative",
+            "marginLeft": "40px"
+          },
+          "children": [
+            {
+              "type": "image",
+              "content": "Canon PowerShot G7X Mark II camera in box",
+              "style": {
+                "borderRadius": "12px",
+                "width": "400px",
+                "height": "auto"
+              }
+            },
+            {
+              "type": "badge",
+              "content": "Special Offers",
+              "style": {
+                "position": "absolute",
+                "bottom": "-10px",
+                "right": "-10px",
+                "backgroundColor": "#ffffff",
+                "color": "#10b981",
+                "padding": "8px 16px",
+                "borderRadius": "20px",
+                "fontSize": "14px",
+                "fontWeight": "600",
+                "boxShadow": "0 4px 6px rgba(0, 0, 0, 0.1)"
+              },
+              "children": [
+                {
+                  "type": "icon",
+                  "content": "green-dot",
+                  "style": {
+                    "color": "#10b981",
+                    "marginRight": "6px"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "cookieBanner",
+      "style": {
+        "position": "fixed",
+        "bottom": "0",
+        "left": "0",
+        "right": "0",
+        "backgroundColor": "#3b82f6",
+        "padding": "16px 24px",
+        "display": "flex",
+        "alignItems": "center",
+        "justifyContent": "space-between"
+      },
+      "children": [
+        {
+          "type": "cookieText",
+          "style": {
+            "color": "#ffffff",
+            "fontSize": "14px",
+            "flex": "1"
+          },
+          "children": [
+            {
+              "type": "text",
+              "content": "By continuing to use this site, you accept our "
+            },
+            {
+              "type": "link",
+              "content": "Cookie Policy",
+              "style": {
+                "color": "#ffffff",
+                "textDecoration": "underline"
+              }
+            },
+            {
+              "type": "text",
+              "content": ". We use cookies to enhance your browsing experience and analyze site traffic."
+            }
+          ]
+        },
+        {
+          "type": "cookieButtons",
+          "style": {
+            "display": "flex",
+            "gap": "12px"
+          },
+          "children": [
+            {
+              "type": "button",
+              "content": "✕ Decline",
+              "style": {
+                "backgroundColor": "transparent",
+                "color": "#ffffff",
+                "border": "1px solid #ffffff",
+                "padding": "8px 16px",
+                "borderRadius": "4px",
+                "fontSize": "14px"
+              }
+            },
+            {
+              "type": "button",
+              "content": "✓ Accept",
+              "style": {
+                "backgroundColor": "#ffffff",
+                "color": "#3b82f6",
+                "border": "none",
+                "padding": "8px 16px",
+                "borderRadius": "4px",
+                "fontSize": "14px",
+                "fontWeight": "600"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "chatWidget",
+      "style": {
+        "position": "fixed",
+        "bottom": "80px",
+        "right": "24px",
+        "backgroundColor": "#3b82f6",
+        "color": "#ffffff",
+        "padding": "12px 16px",
+        "borderRadius": "24px",
+        "fontSize": "14px",
+        "display": "flex",
+        "alignItems": "center",
+        "gap": "8px",
+        "boxShadow": "0 4px 12px rgba(0, 0, 0, 0.15)"
+      },
+      "children": [
+        {
+          "type": "text",
+          "content": "Chat with us 👋"
+        }
+      ]
+    }
+  ]
+}
