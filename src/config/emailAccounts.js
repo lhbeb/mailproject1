@@ -55,7 +55,7 @@ export function createTransporter(account) {
 }
 
 /**
- * Returns a list f available email accounts (user only, no passwords).
+ * Returns a list available email accounts (user only, no passwords).
  * @returns {Array} Array of account objects with user property.
  */
 export function getPublicAccounts() {
