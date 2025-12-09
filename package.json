@@ -10,10 +10,10 @@
   },
   "dependencies": {
     "cheerio": "^1.0.0-rc.12",
-    "next": "15.5.3",
+    "next": "^15.4.8",
     "nodemailer": "^7.0.6",
-    "react": "19.1.0",
-    "react-dom": "19.1.0"
+    "react": "^19.2.1",
+    "react-dom": "^19.2.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
@@ -23,7 +23,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "15.5.3",
+    "eslint-config-next": "^16.0.8",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
