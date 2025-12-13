@@ -1,51 +1,18 @@
 import { getRandomAccount, createTransporter, getAccountByUser } from '../../src/config/emailAccounts';
 
-// Reuse the transporter from the shipping email
-// let transporter = null;
-
-// Simple authentication check
-function checkAuth(req) {
-  const sessionCookie = req.headers.cookie?.split(';')
-    .find(cookie => cookie.trim().startsWith('session='));
-
-  if (!sessionCookie) {
-    return false;
-  }
-
-  try {
-    const sessionValue = sessionCookie.split('=')[1];
-    // Basic JWT validation (same as shipping email)
-    const parts = sessionValue.split('.');
-    if (parts.length !== 3) {
-      return false;
-    }
-
-    const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString());
-    return payload.userId === '1234567890';
-  } catch (error) {
-    console.error('Auth validation error:', error);
-    return false;
-  }
-}
-
 export default async function handler(req, res) {
   // Only allow POST requests
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // Authentication bypassed for order confirmation emails
-  // if (!checkAuth(req)) {
-  //   return res.status(401).json({ error: 'Unauthorized' });
-  // }
-
   try {
-    const { customerName, customerEmail, orderNumber, orderDate, items, subtotal, shipping, total, senderEmail } = req.body;
+    const { customerName, customerEmail, customerAddress, productName, senderEmail } = req.body;
 
     // Validate required fields
-    if (!customerEmail || !customerAddress || !productName) {
+    if (!customerEmail || !customerName || !productName) {
       return res.status(400).json({
-        error: 'Missing required fields: customerEmail, customerAddress, and productName are required'
+        error: 'Missing required fields: customerEmail, customerName, and productName are required'
       });
     }
 
@@ -56,14 +23,15 @@ export default async function handler(req, res) {
     }
 
     console.log('=== SENDING ORDER CONFIRMATION EMAIL ===');
-    console.log('Customer Email:', customerEmail);
+    console.log('Customer:', customerName);
     console.log('Email:', customerEmail);
     console.log('Product:', productName);
 
-    // Get the email transporter
-    const emailTransporter = getTransporter();
+    // Get the email account and create transporter
+    const account = senderEmail ? await getAccountByUser(senderEmail) : getRandomAccount();
+    const emailTransporter = createTransporter(account);
 
-    // HTML email template - HappyDeel Branded with Modern Design
+    // HTML email template - Refined for Email Client Compatibility
     const htmlTemplate = `
       <!DOCTYPE html>
       <html lang="en">
@@ -72,11 +40,8 @@ export default async function handler(req, res) {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Order Confirmation - HappyDeel</title>
         <style>
-          * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-          }
+          /* Reset */
+          * { margin: 0; padding: 0; box-sizing: border-box; }
           body { 
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; 
             line-height: 1.6; 
@@ -85,6 +50,8 @@ export default async function handler(req, res) {
             padding: 0; 
             background-color: #f9fafb; 
           }
+          
+          /* Container */
           .container { 
             max-width: 600px; 
             margin: 0 auto; 
@@ -93,13 +60,18 @@ export default async function handler(req, res) {
             overflow: hidden;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
           }
+          
+          /* Header */
           .header { 
-            background-color: #1e3a8a; 
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); 
             color: white; 
             padding: 48px 32px; 
             text-align: center; 
             position: relative;
           }
+          /* Fallback background for clients that don't support gradients well */
+          .header { background-color: #1e3a8a; }
+
           .header-title { 
             font-size: 32px; 
             font-weight: 700; 
@@ -114,25 +86,46 @@ export default async function handler(req, res) {
             position: relative;
             z-index: 1;
           }
+          
+          /* Content */
           .content { 
             padding: 48px 32px; 
           }
+          
+          /* Confirmation Card */
           .confirmation-card {
             background-color: #f8fafc;
             border: 1px solid #e2e8f0;
             border-radius: 16px;
             padding: 32px;
             margin-bottom: 32px;
-            position: relative;
-            overflow: hidden;
+            text-align: center;
           }
+          
+          /* Icon - Fixed centering and shape using block/line-height instead of flex */
+          .confirmation-icon {
+            width: 64px;
+            height: 64px;
+            line-height: 64px; /* Vertically center text */
+            background-color: #3b82f6; /* Solid color fallback */
+            border-radius: 50%;
+            display: inline-block; /* Better structure */
+            text-align: center; /* Horizontally center text */
+            margin: 0 auto 24px auto;
+            color: white;
+            font-size: 28px;
+            /* Ensure it doesn't get squashed */
+            min-width: 64px;
+            min-height: 64px;
+          }
+          
+          /* Order Info */
           .order-info {
             background: white;
             border: 1px solid #e5e7eb;
             border-radius: 12px;
             padding: 24px;
             margin-bottom: 32px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
           }
           .order-title {
             font-size: 18px;
@@ -145,13 +138,14 @@ export default async function handler(req, res) {
             font-size: 14px;
             margin-bottom: 4px;
           }
+          
+          /* Next Steps */
           .next-steps {
             background: white;
             border: 1px solid #e5e7eb;
             border-radius: 12px;
             padding: 24px;
             margin-bottom: 32px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
           }
           .next-steps h3 {
             font-size: 18px;
@@ -159,21 +153,49 @@ export default async function handler(req, res) {
             color: #1f2937;
             margin-bottom: 16px;
           }
-          .step-item-box {
+          
+          /* Step Item - Table-like layout for better alignment */
+          .step-item {
             margin-bottom: 12px;
             padding: 12px;
             background: #f8fafc;
             border-radius: 8px;
             border-left: 3px solid #3b82f6;
           }
-          .step-content {
+          .step-table {
+            width: 100%;
+            border-collapse: collapse;
+          }
+          .step-number-cell {
+            width: 40px;
+            vertical-align: top;
+          }
+          
+          /* Step Number - Fixed centering */
+          .step-number {
+            background: #3b82f6;
+            color: white;
+            width: 24px;
+            height: 24px;
+            line-height: 24px; /* Vertically center */
+            border-radius: 50%;
+            display: inline-block;
+            text-align: center; /* Horizontally center */
+            font-size: 12px;
+            font-weight: 600;
+          }
+          
+          .step-content-cell {
+            vertical-align: top;
             color: #374151;
             font-size: 14px;
             line-height: 1.5;
           }
+          
+          /* Delivery Info */
           .delivery-info {
             background: #fef3c7;
-            border: 1px solid #fcd34d;
+            border: 1px solid #ffef02;
             border-radius: 12px;
             padding: 24px;
             margin-bottom: 32px;
@@ -189,6 +211,8 @@ export default async function handler(req, res) {
             font-size: 14px;
             margin: 0;
           }
+          
+          /* Footer */
           .footer { 
             background: #f8fafc; 
             padding: 32px; 
@@ -206,6 +230,14 @@ export default async function handler(req, res) {
             font-size: 14px; 
             margin-bottom: 16px; 
           }
+          
+          /* Contact Info - Stacked layout */
+          .contact-info { 
+            margin-bottom: 24px; 
+          }
+          .contact-link-wrapper {
+            margin-bottom: 8px;
+          }
           .contact-link { 
             color: #3b82f6; 
             text-decoration: none; 
@@ -220,17 +252,6 @@ export default async function handler(req, res) {
             font-size: 12px; 
             line-height: 1.5; 
           }
-          @media screen and (max-width: 480px) {
-            .contact-item {
-              display: block !important;
-              width: 100% !important;
-              max-width: 100% !important;
-              padding: 8px 0 !important;
-            }
-            .content {
-              padding: 32px 24px !important;
-            }
-          }
         </style>
       </head>
       <body>
@@ -242,15 +263,10 @@ export default async function handler(req, res) {
           
           <div class="content">
             <div class="confirmation-card">
-              <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin: 0 auto 24px;">
-                <tr>
-                  <td align="center" bgcolor="#3b82f6" style="width: 64px; height: 64px; line-height: 64px; font-size: 28px; color: #ffffff; border-radius: 32px;">
-                    📦
-                  </td>
-                </tr>
-              </table>
-              <h2 style="text-align: center; font-size: 24px; font-weight: 600; color: #1f2937; margin-bottom: 16px;">Your order has been received</h2>
-              <p style="text-align: center; color: #6b7280; font-size: 16px;">We're preparing your item with care and attention to detail.</p>
+              <!-- Using a span for the icon with explicit block display and dimensions -->
+              <span class="confirmation-icon">📦</span>
+              <h2 style="font-size: 24px; font-weight: 600; color: #1f2937; margin-bottom: 16px;">Your order has been received</h2>
+              <p style="color: #6b7280; font-size: 16px;">We're preparing your item with care and attention to detail.</p>
             </div>
 
             <div class="order-info">
@@ -261,55 +277,41 @@ export default async function handler(req, res) {
 
             <div class="next-steps">
               <h3>📋 What happens next?</h3>
-              <div class="step-item-box">
-                <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+              
+              <!-- Using tables for steps to ensure alignment in all clients -->
+              <div class="step-item">
+                <table class="step-table" border="0" cellpadding="0" cellspacing="0">
                   <tr>
-                    <td valign="top" style="width: 36px; padding-right: 12px;">
-                      <table role="presentation" border="0" cellpadding="0" cellspacing="0">
-                        <tr>
-                          <td align="center" bgcolor="#3b82f6" style="width: 24px; height: 24px; line-height: 24px; font-size: 12px; font-weight: 600; color: #ffffff; border-radius: 12px;">
-                            1
-                          </td>
-                        </tr>
-                      </table>
+                    <td class="step-number-cell">
+                      <span class="step-number">1</span>
                     </td>
-                    <td valign="middle" class="step-content">
+                    <td class="step-content-cell">
                       Our team will carefully inspect and prepare your item for shipping
                     </td>
                   </tr>
                 </table>
               </div>
-              <div class="step-item-box">
-                <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+              
+              <div class="step-item">
+                <table class="step-table" border="0" cellpadding="0" cellspacing="0">
                   <tr>
-                    <td valign="top" style="width: 36px; padding-right: 12px;">
-                      <table role="presentation" border="0" cellpadding="0" cellspacing="0">
-                        <tr>
-                          <td align="center" bgcolor="#3b82f6" style="width: 24px; height: 24px; line-height: 24px; font-size: 12px; font-weight: 600; color: #ffffff; border-radius: 12px;">
-                            2
-                          </td>
-                        </tr>
-                      </table>
+                    <td class="step-number-cell">
+                      <span class="step-number">2</span>
                     </td>
-                    <td valign="middle" class="step-content">
+                    <td class="step-content-cell">
                       You'll receive a shipping notification with tracking details within 2-3 business days
                     </td>
                   </tr>
                 </table>
               </div>
-              <div class="step-item-box">
-                <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+              
+              <div class="step-item">
+                <table class="step-table" border="0" cellpadding="0" cellspacing="0">
                   <tr>
-                    <td valign="top" style="width: 36px; padding-right: 12px;">
-                      <table role="presentation" border="0" cellpadding="0" cellspacing="0">
-                        <tr>
-                          <td align="center" bgcolor="#3b82f6" style="width: 24px; height: 24px; line-height: 24px; font-size: 12px; font-weight: 600; color: #ffffff; border-radius: 12px;">
-                            3
-                          </td>
-                        </tr>
-                      </table>
+                    <td class="step-number-cell">
+                      <span class="step-number">3</span>
                     </td>
-                    <td valign="middle" class="step-content">
+                    <td class="step-content-cell">
                       Your package will be delivered within 3-5 business days after shipping
                     </td>
                   </tr>
@@ -327,48 +329,16 @@ export default async function handler(req, res) {
             <div class="footer-content">
               <h3>Need Help?</h3>
               <p>If you have any questions about your order, our customer service team is here to help.</p>
-              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom: 24px;">
-                <tr>
-                  <td align="center">
-                    <!--[if mso]>
-                    <table role="presentation" border="0" cellspacing="0" cellpadding="0" align="center">
-                    <tr>
-                    <td align="center" width="220" style="padding: 0 10px;">
-                    <![endif]-->
-                    <div class="contact-item" style="display: inline-block; width: 100%; max-width: 220px; vertical-align: top;">
-                      <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
-                        <tr>
-                          <td align="center" style="padding: 5px;">
-                            <a href="mailto:support@happydeel.com" class="contact-link" style="display: inline-block;">
-                              <span style="vertical-align: middle;">📧</span> Email Support
-                            </a>
-                          </td>
-                        </tr>
-                      </table>
-                    </div>
-                    <!--[if mso]>
-                    </td>
-                    <td align="center" width="220" style="padding: 0 10px;">
-                    <![endif]-->
-                    <div class="contact-item" style="display: inline-block; width: 100%; max-width: 220px; vertical-align: top;">
-                      <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
-                        <tr>
-                          <td align="center" style="padding: 5px;">
-                            <a href="tel:+17176484487" class="contact-link" style="display: inline-block;">
-                              <span style="vertical-align: middle;">📞</span> +17176484487
-                            </a>
-                          </td>
-                        </tr>
-                      </table>
-                    </div>
-                    <!--[if mso]>
-                    </td>
-                    </tr>
-                    </table>
-                    <![endif]-->
-                  </td>
-                </tr>
-              </table>
+              
+              <div class="contact-info">
+                <div class="contact-link-wrapper">
+                  <a href="mailto:support@happydeel.com" class="contact-link">📧 Email Support</a>
+                </div>
+                <div class="contact-link-wrapper">
+                  <a href="tel:+17176484487" class="contact-link">📞 +17176484487</a>
+                </div>
+              </div>
+              
               <div class="copyright">
                 © 2024 HappyDeel. All rights reserved.<br>
                 The smart way to buy quality items — for less.
@@ -384,33 +354,20 @@ export default async function handler(req, res) {
     const textTemplate = `
       Order Confirmed!
       
-      Thank you for your purchase.
+      Thank you for your purchase, ${customerName}.
       
-      Your order for "${productName}" has been received. We're preparing your item with care and attention to detail.
+      Your order for "${productName}" has been received.
       
-      Shipping to: ${customerAddress}
-      Order confirmation sent to: ${customerEmail}
+      Shipping To: ${customerAddress || 'Address not provided'}
       
-      What happens next?
-      1. Our team will carefully inspect and prepare your item for shipping.
-      2. You'll receive a shipping notification with tracking details within 2-3 business days.
-      3. Your package will be delivered within 3-5 business days after shipping.
-      
-      Delivery Information:
-      We'll send you tracking information as soon as your order ships. All items receive extra care during our inspection process.
-      
-      Need Help?
-      If you have any questions about your order, our customer service team is here to help.
-      Email Support: support@happydeel.com
-      Phone: +17176484487
+      Questions? Email support@happydeel.com
       
       © 2024 HappyDeel. All rights reserved.
-      The smart way to buy quality items — for less.
     `;
 
     // Email options
     const mailOptions = {
-      from: `"Happydeel" <${emailTransporter.transporter.options.auth.user}>`,
+      from: `Happydeel <${account.user}>`,
       to: customerEmail,
       subject: `Order Confirmation - ${productName} 🎉`,
       html: htmlTemplate,
