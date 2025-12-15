@@ -1,4 +1,4 @@
-import { getRandomAccount, createTransporter } from '../../src/config/emailAccounts';
+import { getRandomAccount, createTransporter, getAccountByUser } from '../../src/config/emailAccounts';
 
 // Create a persistent SMTP transporter (connection pool)
 // Note: With multiple accounts, we might want to create a pool per account or just create fresh connections.
@@ -77,6 +77,18 @@ export default async function handler(req, res) {
 
     // Get the persistent transporter (no need to verify each time)
     // const emailTransporter = getTransporter();
+
+    // Determine which account to use
+    let account = null;
+    if (senderEmail) {
+      account = getAccountByUser(senderEmail);
+    }
+
+    // Fallback to random account if specific one not found or not requested
+    if (!account) {
+      account = getRandomAccount();
+    }
+
     console.log(`Selected email account: ${account.user}`);
     const emailTransporter = createTransporter(account);
 
